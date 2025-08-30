@@ -6,44 +6,39 @@ class App extends Component {
     super(props);
     this.state = {
       renderBall: false,
-      posi: 0,
-      ballPosition: { left: "0px" },
+      posi: 0, // numeric left position
     };
     this.renderChoice = this.renderBallOrButton.bind(this);
     this.buttonClickHandler = this.buttonClickHandler.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
-  // Handle Start Button click → show ball & start moving
   buttonClickHandler() {
-    this.setState({ renderBall: true }, () => {
-      this.intervalId = setInterval(() => {
-        this.setState((prevState) => {
-          const newPos = prevState.posi + 5;
-          return {
-            posi: newPos,
-            ballPosition: { left: newPos + "px" },
-          };
-        });
-      }, 100); // move every 100ms
-    });
+    this.setState({ renderBall: true, posi: 0 });
   }
 
-  // Clear interval when component unmounts
+  handleKeyDown(e) {
+    if (e.keyCode === 39 && this.state.renderBall) {
+      this.setState((prev) => ({ posi: prev.posi + 5 }));
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyDown);
+  }
   componentWillUnmount() {
-    clearInterval(this.intervalId);
+    document.removeEventListener("keydown", this.handleKeyDown);
   }
 
-  // Conditionally render Ball or Start button
   renderBallOrButton() {
     if (this.state.renderBall) {
-      return <div className="ball" style={this.state.ballPosition}></div>;
-    } else {
-      return (
-        <button className="start" onClick={this.buttonClickHandler}>
-          Start
-        </button>
-      );
+      return <div className="ball" style={{ left: this.state.posi + "px" }} />;
     }
+    return (
+      <button className="start" onClick={this.buttonClickHandler}>
+        Start
+      </button>
+    );
   }
 
   render() {
